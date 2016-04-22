@@ -2,6 +2,6 @@
 
 
 
-![alt tag](/images/network-topo.jpg)
+![alt tag](https://github.com/nguyenvulebinh/kura_experience/blob/master/network-topo.jpg)
 
 
