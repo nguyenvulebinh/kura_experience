@@ -9,7 +9,136 @@
 
 ##Phần mềm cài đặt trên các thiết bị:
 
-+ **Raspberry Pi:** Cài đặt chương trình trên Arduino
++ **Raspberry Pi:** Các bước cài đặt trên raspberry pi
+- Cài đặt Raspbian bằng image lite tải theo [link](https://www.raspberrypi.org/downloads/raspbian/)
+- Cài đặt jdk. Sử dụng bản [Linux ARM 64 Hard Float ABI](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+- Cài đặt kura lên Raspbian sử dụng bản [Raspbian (with Web UI) - Stable](http://www.eclipse.org/kura/downloads.php) và làm theo hướng dẫn trên [link](http://eclipse.github.io/kura/doc/raspberry-pi-quick-start.html) bước 5 và bước 6.
+Lưu ý: 
++ jdk phải đặt ở ổ luôn đc mount sẵn khi khởi động Raspberry Pi
++ Sau khi cài đặt kura xong thì vào file "/etc/init.d/kura" chỉnh biến môi trường "export PATH=" trỏ đến đúng thư mục bin của java ví dụ: "$PATH:/java/jdk1.8.0_77/bin" sau đó khởi đông lại Raspberry Pi
++ Cấu hình môi trường trong file "/opt/eclipse/kura/kura/jdk.dio.policy" để i2c hoạt động: "permission jdk.dio.i2cbus.I2CPermission "*:*", "open";"
+
+- Làm theo hướng dẫn trên [link](http://eclipse.github.io/kura/doc/hello-example.html) để cài đặt thử một bundle lên kura.
+- Tận dụng lớp org.eclipse.kura.example.hello_osgi.HelloOsgi và đưa code sau vào để build
+
+```java
+package org.eclipse.kura.example.hello_osgi;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
+
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jdk.dio.ClosedDeviceException;
+import jdk.dio.DeviceManager;
+import jdk.dio.DeviceNotFoundException;
+import jdk.dio.UnavailableDeviceException;
+import jdk.dio.gpio.GPIOPin;
+import jdk.dio.i2cbus.I2CDevice;
+import jdk.dio.i2cbus.I2CDeviceConfig;
+
+public class HelloOsgi {
+	private static final Logger s_logger = LoggerFactory.getLogger(HelloOsgi.class);
+
+    private static final String APP_ID = "org.eclipse.kura.example.hello_osgi";
+    public static GPIOPin led;
+    public static I2CDevice aDevice;
+    public static Thread onOffLed = null;
+    protected void activate(ComponentContext componentContext) {
+
+        s_logger.info("Nguyen Binh: Bundle " + APP_ID + " has started!");
+
+        s_logger.debug("Nguyen Binh: " + APP_ID + ": This is a debug message.");
+        
+		
+		try {
+			
+			I2CDeviceConfig config = new I2CDeviceConfig(
+				    1,                                  //I2C bus index
+				    57,                                 //I2C device address
+				    7,                              //Number of bits in the address
+				    160000000                          //I2C Clock Frequency
+				);
+
+			aDevice = (I2CDevice) DeviceManager.open(I2CDevice.class, config);
+			s_logger.info("Nguyen Binh: 11");
+		} catch (DeviceNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			s_logger.info("Nguyen Binh: 21");
+		} catch (UnavailableDeviceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			s_logger.info("Nguyen Binh: 31");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			s_logger.info("Nguyen Binh: 41");
+		}
+		
+
+		onOffLed = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				int i = 0;
+				ByteBuffer bufferDataND = ByteBuffer.allocate(10);
+				ByteBuffer bufferDataDA = ByteBuffer.allocate(10);
+				while (i == 0) {
+					try {
+						int num = aDevice.read(bufferDataND);
+						s_logger.info("\nNumber byte read: " + num);
+						num = aDevice.read(bufferDataDA);
+						s_logger.info("\nNumber byte read: " + num);
+						bufferDataND.flip();
+						bufferDataDA.flip();
+						s_logger.info("\nNhiet do: "+ bufferDataND.get() + " C");
+						s_logger.info("\nDo am: "+ bufferDataDA.get() + " %");
+						bufferDataND.clear();
+						bufferDataDA.clear();
+						Thread.sleep(5000);
+					} catch (UnavailableDeviceException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ClosedDeviceException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+			}
+		});
+		onOffLed.start();
+    }
+
+    protected void deactivate(ComponentContext componentContext) {
+
+        s_logger.info("Nguyen Binh: Bundle " + APP_ID + " has stopped!");
+		onOffLed.interrupt();
+		onOffLed.stop();
+		try {
+			aDevice.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+
+}
+```
+
+
++ **Arduino:** Cài đặt chương trình sau trên Arduino
 
 ```c
 #include <dht.h>
@@ -218,9 +347,12 @@ void loop()
 }
 ```
 
-
-
-
-
 ##Kết quả
 ![alt tag](https://github.com/nguyenvulebinh/kura_experience/blob/master/ketqua.jpg)
+
+Trong quá trình code và debug sử dụng framework kura deploy trên Raspberry Pi, có thể sử dụng những lệnh sau
++ "tail -f /var/log/kura-console.log" hiện log debug
++ "tail -f /var/log/kura.log" hiện log lỗi
++ "telnet localhost 5002" hiển thị osgi command line
+
+
