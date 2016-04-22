@@ -2,6 +2,6 @@
 
 
 
-.. image:: /images/network-topo.jpg
+![alt tag](/images/network-topo.jpg)
 
 
