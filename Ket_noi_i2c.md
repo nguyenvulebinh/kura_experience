@@ -1,26 +1,26 @@
 # Kết nối Raspberry với Arduino thông qua Kura sử dụng kết nối i2c nhận dữ liệu từ sensor nhiệt ẩm
 
 ##Chuẩn bị thiết bị và tiến hành kết nối lại như hình: 
-+ **Raspberry Pi**
-+ **Arduino**
-+ **Cảm biến nhiệt ẩm DHT11**
+### **Raspberry Pi**
+### **Arduino**
+### **Cảm biến nhiệt ẩm DHT11**
 
 ![alt tag](https://github.com/nguyenvulebinh/kura_experience/blob/master/thietbi.jpg)
 
 ##Phần mềm cài đặt trên các thiết bị:
 
-+ **Raspberry Pi:** Các bước cài đặt trên raspberry pi
-- Cài đặt Raspbian bằng image lite tải theo [link](https://www.raspberrypi.org/downloads/raspbian/)
-- Cài đặt jdk. Sử dụng bản [Linux ARM 64 Hard Float ABI](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-- Cài đặt kura lên Raspbian sử dụng bản [Raspbian (with Web UI) - Stable](http://www.eclipse.org/kura/downloads.php) và làm theo hướng dẫn trên [link](http://eclipse.github.io/kura/doc/raspberry-pi-quick-start.html) bước 5 và bước 6.
+### **Raspberry Pi:** Các bước cài đặt trên raspberry pi
+#### Cài đặt Raspbian bằng image lite tải theo [link](https://www.raspberrypi.org/downloads/raspbian/)
+#### Cài đặt jdk. Sử dụng bản [Linux ARM 64 Hard Float ABI](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+#### Cài đặt kura lên Raspbian sử dụng bản [Raspbian (with Web UI) - Stable](http://www.eclipse.org/kura/downloads.php) và làm theo hướng dẫn trên [link](http://eclipse.github.io/kura/doc/raspberry-pi-quick-start.html) bước 5 và bước 6.
 
 Lưu ý: 
 + jdk phải đặt ở ổ luôn đc mount sẵn khi khởi động Raspberry Pi
 + Sau khi cài đặt kura xong thì vào file "/etc/init.d/kura" chỉnh biến môi trường "export PATH=" trỏ đến đúng thư mục bin của java ví dụ: "$PATH:/java/jdk1.8.0_77/bin" sau đó khởi đông lại Raspberry Pi
 + Cấu hình môi trường trong file "/opt/eclipse/kura/kura/jdk.dio.policy" để i2c hoạt động: "permission jdk.dio.i2cbus.I2CPermission "*:*", "open";"
 
-- Làm theo hướng dẫn trên [link](http://eclipse.github.io/kura/doc/hello-example.html) để cài đặt thử một bundle lên kura.
-- Tận dụng lớp org.eclipse.kura.example.hello_osgi.HelloOsgi và đưa code sau vào để build
+#### Làm theo hướng dẫn trên [link](http://eclipse.github.io/kura/doc/hello-example.html) để cài đặt thử một bundle lên kura.
+#### Tận dụng lớp org.eclipse.kura.example.hello_osgi.HelloOsgi và đưa code sau vào để build
 
 ```java
 package org.eclipse.kura.example.hello_osgi;
@@ -139,7 +139,7 @@ public class HelloOsgi {
 ```
 
 
-+ **Arduino:** Cài đặt chương trình sau trên Arduino
+### **Arduino:** Cài đặt chương trình sau trên Arduino
 
 ```c
 #include <dht.h>
